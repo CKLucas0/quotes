@@ -158,7 +158,7 @@
 <body>
 <div id="loading-screen">
   <svg id="canvas" viewBox="0 0 500 500" aria-hidden="true">
-    <text id="text" class="text" x="0" y="0">Quotes</text>
+    <text id="text" class="text" x="0" y="0">uotes</text>
   </svg>
 </div>
 
@@ -258,7 +258,7 @@
       if (index < quotes.length) {
         let quoteText = quotes[index].quote;
         const quoteElement = document.createElement('div');
-        quoteElement.classList.add('uote');
+        quoteElement.classList.add('quote');
         quoteElement.innerHTML = `${quoteText}<br><br>- ${quotes[index].person} -<br><br>${quotes[index].date} ${quotes[index].time}`;
         const container = document.getElementById('quotes');
         const oldQuote = container.querySelector('.quote');
