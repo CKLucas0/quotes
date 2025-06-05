@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quotes</title>
+  <title>Quotes met Loading</title>
   <style>
     body {
       margin: 0;
@@ -158,7 +158,7 @@
 <body>
 <div id="loading-screen">
   <svg id="canvas" viewBox="0 0 500 500" aria-hidden="true">
-    <text id="text" class="text" x="0" y="0">uotes</text>
+    <text id="text" class="text" x="0" y="0">Quotes</text>
   </svg>
 </div>
 
@@ -244,35 +244,48 @@
   5000);
 
   async function fetchQuotes() {
-    const response = await fetch('quotes.txt');
-    const text = await response.text();
-    const lines = text.trim().split('\n');
-    let quotes = lines.map(line => {
-      const match = line.match(/\[(\d{2}-\d{2}-\d{4}) (\d{2}:\d{2})\] (.*?): (.*)/);
-      return match ? { date: match[1], time: match[2], person: match[3], quote: match[4] } : null;
-    }).filter(q => q);
-    quotes.reverse();
-    let index = 0;
-    const quoteIndicator = document.getElementById('quoteIndicator');
-    setInterval(() => {
-      if (index < quotes.length) {
-        let quoteText = quotes[index].quote;
-        const quoteElement = document.createElement('div');
-        quoteElement.classList.add('quote');
-        quoteElement.innerHTML = `${quoteText}<br><br>- ${quotes[index].person} -<br><br>${quotes[index].date} ${quotes[index].time}`;
-        const container = document.getElementById('quotes');
-        const oldQuote = container.querySelector('.quote');
-        if (oldQuote) {
-          oldQuote.classList.add('last');
-          setTimeout(() => { oldQuote.remove(); }, 2000);
-        }
-        container.appendChild(quoteElement);
-        quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
-        index++;
-        if (index >= quotes.length) index = 0;
-      }
-    }, 10000);
+  const response = await fetch('quotes.txt');
+  const text = await response.text();
+  const lines = text.trim().split('\n');
+  let quotes = lines.map(line => {
+    const match = line.match(/\[(\d{2}-\d{2}-\d{4}) (\d{2}:\d{2})\] (.*?): (.*)/);
+    return match ? { date: match[1], time: match[2], person: match[3], quote: match[4] } : null;
+  }).filter(q => q);
+
+  quotes.reverse();
+  let index = 0;
+  const quoteIndicator = document.getElementById('quoteIndicator');
+  const container = document.getElementById('quotes');
+
+  function showNextQuote() {
+    if (quotes.length === 0) return;
+
+    let quoteObj = quotes[index];
+    let quoteText = quoteObj.quote;
+
+    const quoteElement = document.createElement('div');
+    quoteElement.classList.add('quote');
+    quoteElement.innerHTML = `${quoteText}<br><br>- ${quoteObj.person} -<br><br>${quoteObj.date} ${quoteObj.time}`;
+
+    const oldQuote = container.querySelector('.quote');
+    if (oldQuote) {
+      oldQuote.classList.add('last');
+      setTimeout(() => oldQuote.remove(), 2000);
+    }
+
+    container.appendChild(quoteElement);
+    quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
+
+    // Bepaal tijdsduur op basis van lengte van quote
+    const length = quoteText.length;
+    const seconds = Math.ceil(length / 35) * 2;
+    index = (index + 1) % quotes.length;
+
+    setTimeout(showNextQuote, seconds * 1000);
   }
+
+  showNextQuote(); // Start de eerste quote
+}
 
   fetchQuotes();
 </script>
