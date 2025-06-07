@@ -4,13 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quotes</title>
-     <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-4WMD1NQT45"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-  
     gtag('config', 'G-4WMD1NQT45');
   </script>
   <style>
@@ -23,13 +21,12 @@
       color: white;
       overflow: hidden;
     }
-    
+
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
 
     #loading-screen {
       position: fixed;
@@ -73,7 +70,6 @@
       position: relative;
     }
 
-    
     .quote-container {
       position: relative;
       width: 80%;
@@ -128,15 +124,40 @@
       font-weight: bold;
       opacity: 0.5;
     }
+
+    #music-toggle {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
+
+<!-- 🎵 Muziek + knop -->
+<audio id="bg-music" loop autoplay>
+  <source src="https://cdn.pixabay.com/download/audio/2022/11/03/audio_63ed700ec1.mp3?filename=gentle-piano-ambient-11766.mp3" type="audio/mpeg">
+  Je browser ondersteunt dit audio-element niet.
+</audio>
+
+<button id="music-toggle">🔊 Muziek aan/uit</button>
+
+<!-- 🔄 Loading scherm -->
 <div id="loading-screen">
   <svg id="canvas" viewBox="0 0 500 500" aria-hidden="true">
     <text id="text" class="text" x="0" y="0">uotes</text>
   </svg>
 </div>
 
+<!-- 📜 Main content -->
 <div id="main-content">
   <div class="background-shapes">
     <div class="shape"></div><div class="shape"></div><div class="shape"></div><div class="shape"></div>
@@ -147,6 +168,7 @@
   <div id="quoteIndicator" class="quote-indicator">1/1</div>
 </div>
 
+<!-- 🔧 Script -->
 <script>
   setTimeout(() => {
     document.getElementById('loading-screen').style.display = 'none';
@@ -215,89 +237,74 @@
       text.setAttribute("x", extX + 20);
       text.setAttribute("y", extY - 50);
     }
-  }, 
-  5000);
+  }, 5000);
 
   async function fetchQuotes() {
-  const response = await fetch('quotes.txt');
-  const text = await response.text();
-  const lines = text.trim().split('\n');
-  let quotes = lines.map(line => {
-    const match = line.match(/\[(\d{2}-\d{2}-\d{4}) (\d{2}:\d{2})\] (.*?): (.*)/);
-    return match ? { date: match[1], time: match[2], person: match[3], quote: match[4] } : null;
-  }).filter(q => q);
+    const response = await fetch('quotes.txt');
+    const text = await response.text();
+    const lines = text.trim().split('\n');
+    let quotes = lines.map(line => {
+      const match = line.match(/\[(\d{2}-\d{2}-\d{4}) (\d{2}:\d{2})\] (.*?): (.*)/);
+      return match ? { date: match[1], time: match[2], person: match[3], quote: match[4] } : null;
+    }).filter(q => q);
 
-  quotes.reverse();
-  let index = 0;
-  const quoteIndicator = document.getElementById('quoteIndicator');
-  const container = document.getElementById('quotes');
+    quotes.reverse();
+    let index = 0;
+    const quoteIndicator = document.getElementById('quoteIndicator');
+    const container = document.getElementById('quotes');
 
-  function showNextQuote() {
-    if (quotes.length === 0) return;
+    function showNextQuote() {
+      if (quotes.length === 0) return;
+      let quoteObj = quotes[index];
+      let quoteText = quoteObj.quote;
 
-    let quoteObj = quotes[index];
-    let quoteText = quoteObj.quote;
+      const quoteElement = document.createElement('div');
+      quoteElement.classList.add('quote');
+      quoteElement.innerHTML = `${quoteText}<br><br>- ${quoteObj.person} -<br><br>${quoteObj.date} ${quoteObj.time}`;
 
-    const quoteElement = document.createElement('div');
-    quoteElement.classList.add('quote');
-    quoteElement.innerHTML = `${quoteText}<br><br>- ${quoteObj.person} -<br><br>${quoteObj.date} ${quoteObj.time}`;
+      const oldQuote = container.querySelector('.quote');
+      if (oldQuote) {
+        oldQuote.classList.add('last');
+        setTimeout(() => oldQuote.remove(), 2000);
+      }
 
-    const oldQuote = container.querySelector('.quote');
-    if (oldQuote) {
-      oldQuote.classList.add('last');
-      setTimeout(() => oldQuote.remove(), 2000);
+      container.appendChild(quoteElement);
+      quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
+
+      const length = quoteText.length;
+      const seconds = (Math.ceil(length / 25) * 2) + 1;
+      index = (index + 1) % quotes.length;
+      setTimeout(showNextQuote, seconds * 1000);
     }
 
-    container.appendChild(quoteElement);
-    quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
-
-    // Bepaal tijdsduur op basis van lengte van quote
-    const length = quoteText.length;
-    const seconds = (Math.ceil(length / 25) * 2) + 1;
-    index = (index + 1) % quotes.length;
-
-    setTimeout(showNextQuote, seconds * 1000);
+    showNextQuote();
   }
-
-  showNextQuote(); // Start de eerste quote
-}
 
   fetchQuotes();
 
   const bgMusic = document.getElementById('bg-music');
   const musicToggle = document.getElementById('music-toggle');
-  
-  // Start muziek pas na loading screen
+
+  // Fade-in muziek na loading screen
   setTimeout(() => {
-    bgMusic.volume = 0.2;
-    bgMusic.play().catch(() => {}); // Stil in sommige browsers
+    bgMusic.volume = 0;
+    bgMusic.play().catch(() => {});
+    let vol = 0;
+    const fade = setInterval(() => {
+      if (vol < 0.2) {
+        vol += 0.01;
+        bgMusic.volume = vol;
+      } else {
+        clearInterval(fade);
+      }
+    }, 200);
   }, 9000);
-  
-  // Mute/unmute
+
   musicToggle.addEventListener('click', () => {
     bgMusic.muted = !bgMusic.muted;
     musicToggle.textContent = bgMusic.muted ? '🔇 Muziek uit' : '🔊 Muziek aan';
   });
-
 </script>
-  <audio id="bg-music" loop autoplay>
-    <source src="https://cdn.pixabay.com/download/audio/2022/11/03/audio_63ed700ec1.mp3?filename=gentle-piano-ambient-11766.mp3" type="audio/mpeg">
-    Je browser ondersteunt dit audio-element niet.
-  </audio>
-  
-  <button id="music-toggle" style="
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: rgba(255,255,255,0.1);
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
-    z-index: 9999;
-  ">🔊 Muziek aan/uit</button>
 
 </body>
 </html>
