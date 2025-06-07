@@ -12,15 +12,43 @@
     gtag('config', 'G-4WMD1NQT45');
   </script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(-45deg, #1a2a6c, #b21f1f, #fdbb2d, #00c9ff);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-      color: white;
-      overflow: hidden;
+   body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(-45deg, #1a2a6c, #b21f1f, #fdbb2d, #00c9ff);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    color: white;
+    overflow: hidden;
+    position: relative; /* nodig voor pseudo-element */
+  }
+  
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.05);
+    pointer-events: none;
+    z-index: 0;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    animation: fadeInMist 5s forwards;
+  }
+  
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  @keyframes fadeInMist {
+    to {
+      opacity: 1;
     }
+  }
+
 
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
