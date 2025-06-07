@@ -73,6 +73,7 @@
       position: relative;
     }
 
+    
     .quote-container {
       position: relative;
       width: 80%;
@@ -262,6 +263,41 @@
 }
 
   fetchQuotes();
+
+  const bgMusic = document.getElementById('bg-music');
+  const musicToggle = document.getElementById('music-toggle');
+  
+  // Start muziek pas na loading screen
+  setTimeout(() => {
+    bgMusic.volume = 0.2;
+    bgMusic.play().catch(() => {}); // Stil in sommige browsers
+  }, 9000);
+  
+  // Mute/unmute
+  musicToggle.addEventListener('click', () => {
+    bgMusic.muted = !bgMusic.muted;
+    musicToggle.textContent = bgMusic.muted ? '🔇 Muziek uit' : '🔊 Muziek aan';
+  });
+
 </script>
+  <audio id="bg-music" loop autoplay>
+    <source src="https://cdn.pixabay.com/download/audio/2022/11/03/audio_63ed700ec1.mp3?filename=gentle-piano-ambient-11766.mp3" type="audio/mpeg">
+    Je browser ondersteunt dit audio-element niet.
+  </audio>
+  
+  <button id="music-toggle" style="
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    z-index: 9999;
+  ">🔊 Muziek aan/uit</button>
+
 </body>
 </html>
