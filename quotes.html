@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Quotes</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-4WMD1NQT45"></script>
   <script>
@@ -12,48 +12,41 @@
     gtag('config', 'G-4WMD1NQT45');
   </script>
   <style>
-   body {
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(-45deg, #1a2a6c, #b21f1f, #fdbb2d, #00c9ff);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-    color: white;
-    overflow: hidden;
-    position: relative; /* nodig voor pseudo-element */
-  }
-  
-  body::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.05);
-    pointer-events: none;
-    z-index: 0;
-    backdrop-filter: blur(4px);
-    opacity: 0;
-    animation: fadeInMist 5s forwards;
-  }
-  
-  @keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  
-  @keyframes fadeInMist {
-    to {
-      opacity: 1;
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(-45deg, #1a2a6c, #b21f1f, #fdbb2d, #00c9ff);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: white;
+      overflow: hidden;
+      position: relative; /* nodig voor pseudo-element */
     }
-  }
 
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+      z-index: 0;
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      animation: fadeInMist 5s forwards;
+    }
 
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeInMist {
+      to {
+        opacity: 1;
+      }
     }
 
     #loading-screen {
@@ -112,6 +105,12 @@
       top: 10%;
     }
 
+    /* Voeg fadeIn animatie toe aan quotes */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
     .quote {
       background: rgba(255, 255, 255, 0.15);
       padding: 20px;
@@ -125,8 +124,8 @@
       text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
       position: relative;
       z-index: 10;
+      animation: fadeIn 2s ease forwards;
     }
-
 
     @keyframes slideInLeft {
       from { transform: translateX(-100%); opacity: 0; }
@@ -263,9 +262,9 @@
 
     function showNextQuote() {
       if (quotes.length === 0) return;
-    
+
       const oldQuote = container.querySelector('.quote');
-    
+
       if (oldQuote) {
         oldQuote.classList.add('last');
         setTimeout(() => {
@@ -276,30 +275,28 @@
         addQuote();
       }
     }
-    
+
     function addQuote() {
       let quoteObj = quotes[index];
       let quoteText = quoteObj.quote;
-    
+
       const quoteElement = document.createElement('div');
       quoteElement.classList.add('quote');
       quoteElement.innerHTML = `${quoteText}<br><br>- ${quoteObj.person} -<br><br>${quoteObj.date} ${quoteObj.time}`;
-    
+
       container.appendChild(quoteElement);
       quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
-    
+
       const length = quoteText.length;
       const seconds = (Math.ceil(length / 25) * 2) + 1;
       index = (index + 1) % quotes.length;
       setTimeout(showNextQuote, seconds * 1000);
     }
 
-
     showNextQuote();
   }
 
   fetchQuotes();
-
 </script>
 
 </body>
