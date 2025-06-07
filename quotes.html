@@ -251,7 +251,7 @@
 
     // Bepaal tijdsduur op basis van lengte van quote
     const length = quoteText.length;
-    const seconds = Math.ceil(length / 25) * 2;
+    const seconds = (Math.ceil(length / 25) * 2)+1;
     index = (index + 1) % quotes.length;
 
     setTimeout(showNextQuote, seconds * 1000);
