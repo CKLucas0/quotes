@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Quotes</title>
+
+  <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-4WMD1NQT45"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -11,18 +13,21 @@
     gtag('js', new Date());
     gtag('config', 'G-4WMD1NQT45');
   </script>
+
   <style>
+    /* Algemene stijlen en achtergrond */
     body {
       margin: 0;
-      font-family: 'Arial', sans-serif;
+      font-family: Arial, sans-serif;
       background: linear-gradient(-45deg, #1a2a6c, #b21f1f, #fdbb2d, #00c9ff);
       background-size: 400% 400%;
       animation: gradientBG 15s ease infinite;
       color: white;
       overflow: hidden;
-      position: relative; /* nodig voor pseudo-element */
+      position: relative;
     }
 
+    /* Vervagende mist-overlay */
     body::before {
       content: "";
       position: fixed;
@@ -37,16 +42,17 @@
       animation: fadeInMist 5s forwards;
     }
 
+    /* Achtergrond animaties */
     @keyframes gradientBG {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-
     @keyframes fadeInMist {
       to { opacity: 1; }
     }
 
+    /* Loading scherm - volledig scherm zwart met animatie */
     #loading-screen {
       position: fixed;
       top: 0; left: 0;
@@ -59,19 +65,20 @@
       z-index: 1000;
     }
 
+    /* SVG animatie stijlen */
     svg {
       width: 500px;
       height: 500px;
       stroke: white;
       fill: none;
     }
-
     .point { fill: white; opacity: 0; animation: appear 0.5s forwards; }
     .line { stroke-width: 2; stroke: white; stroke-dasharray: 1200; stroke-dashoffset: 1200; animation: draw 1.3s forwards; }
     .line.thickened { animation: draw 2s forwards, thicken-line 0.8s forwards; animation-delay: 0.5s, 2s; }
     .circle { stroke-width: 2; stroke: white; fill: none; stroke-dasharray: 2500; stroke-dashoffset: 2500; animation: draw-circle 2s forwards, thicken-circle 0.8s forwards; animation-delay: 3s, 5s; }
     .text { fill: white; font-family: monospace; font-size: 40px; opacity: 0; animation: slide-in 1s forwards; animation-delay: 8s; }
 
+    /* SVG animaties keyframes */
     @keyframes appear { to { opacity: 1; } }
     @keyframes draw { to { stroke-dashoffset: 0; } }
     @keyframes draw-circle { to { stroke-dashoffset: 0; } }
@@ -79,16 +86,17 @@
     @keyframes thicken-circle { to { stroke-width: 8; } }
     @keyframes slide-in { 0% { opacity: 0; transform: translateX(60px); } 100% { opacity: 1; transform: translateX(0); } }
 
+    /* Main content is verborgen bij laden */
     #main-content {
       display: none;
       height: 100vh;
-      display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
       position: relative;
     }
 
+    /* Container voor quotes */
     .quote-container {
       position: relative;
       width: 80%;
@@ -101,11 +109,10 @@
       overflow-y: auto;
       height: 80vh;
       top: 10%;
-      /* extra: set min-height so the container doesn't jump */
-      min-height: 200px;
+      min-height: 200px; /* voorkomt schommelingen */
     }
 
-    /* Maak quotes absolute voor sliding animaties */
+    /* Quotes absolute positioneren voor animaties */
     .quote-container div.quote {
       position: absolute;
       width: 100%;
@@ -125,26 +132,24 @@
       opacity: 1;
     }
 
-    /* Animatie slide in van links */
+    /* Animaties voor quotes sliding */
     @keyframes slideInLeft {
       from { transform: translateX(-100%); opacity: 0; }
       to { transform: translateX(-50%); opacity: 1; }
     }
-
-    /* Animatie slide out naar rechts */
     @keyframes slideOutRight {
       from { transform: translateX(-50%); opacity: 1; }
       to { transform: translateX(100%); opacity: 0; }
     }
 
-    /* Class voor oude quote die naar rechts gaat */
+    /* Oude quote die weg schuift naar rechts */
     .quote-container div.last {
       animation: slideOutRight 1s ease forwards;
     }
 
-    /* Class voor nieuwe quote die van links komt */
+    /* Nieuwe quote die van links binnen schuift */
     .quote-container div.new {
-      animation: slideInLeft 1s ease forwards;
+      animation: slideInLeft 2s ease forwards;
       opacity: 1;
       position: absolute;
       width: 100%;
@@ -154,6 +159,7 @@
       z-index: 20;
     }
 
+    /* Indicator rechtsboven */
     .quote-indicator {
       position: absolute;
       top: 20px;
@@ -171,146 +177,98 @@
 </head>
 <body>
 
-  <!-- 🔄 Loading scherm -->
+  <!-- Loading scherm -->
   <div id="loading-screen">
     <svg id="canvas" viewBox="0 0 500 500" aria-hidden="true">
       <text id="text" class="text" x="0" y="0">uotes</text>
     </svg>
   </div>
 
-  <!-- 📜 Main content -->
+  <!-- Hoofdinhoud, verborgen tot laden klaar -->
   <div id="main-content">
-    <div class="background-shapes">
-      <div class="shape"></div><div class="shape"></div><div class="shape"></div><div class="shape"></div>
-      <div class="shape"></div><div class="shape"></div><div class="shape"></div><div class="shape"></div>
-      <div class="square"></div>
-    </div>
     <div class="quote-container" id="quotes"></div>
     <div id="quoteIndicator" class="quote-indicator">1/1</div>
   </div>
 
-  <!-- 🔧 Script -->
   <script>
+    // Verberg loading scherm na 9 seconden, toon main content
     setTimeout(() => {
       document.getElementById('loading-screen').style.display = 'none';
       document.getElementById('main-content').style.display = 'flex';
     }, 9000);
 
-    const NS = "http://www.w3.org/2000/svg";
-    const centerX = 275, centerY = 250, radius = 90;
-    const points = [];
-    for (let i = 0; i < 5; i++) {
-      const angle = -Math.PI / 2 + i * (2 * Math.PI / 5);
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
-      points.push({x, y});
-    }
-    const canvas = document.getElementById('canvas');
-    points.forEach((pt, i) => {
-      const circle = document.createElementNS(NS, "circle");
-      circle.setAttribute("cx", pt.x);
-      circle.setAttribute("cy", pt.y);
-      circle.setAttribute("r", 3);
-      circle.setAttribute("class", "point");
-      circle.setAttribute("style", `animation-delay: ${i * 0.5}s`);
-      canvas.appendChild(circle);
-    });
-    const order = [0, 2, 4, 1, 3, 0];
-    let p5 = null, p3 = null;
-    for (let i = 0; i < order.length - 1; i++) {
-      const a = points[order[i]];
-      const b = points[order[i + 1]];
-      const line = document.createElementNS(NS, "line");
-      line.setAttribute("x1", a.x);
-      line.setAttribute("y1", a.y);
-      line.setAttribute("x2", b.x);
-      line.setAttribute("y2", b.y);
-      line.setAttribute("class", "line");
-      line.setAttribute("style", `animation-delay: ${2.5 + i * 0.6}s`);
-      canvas.appendChild(line);
-      if (order[i] === 2 && order[i + 1] === 4) {
-        p3 = points[2];
-        p5 = points[4];
-      }
-    }
-    setTimeout(() => {
-      const circle = document.createElementNS(NS, "circle");
-      circle.setAttribute("cx", centerX);
-      circle.setAttribute("cy", centerY);
-      circle.setAttribute("r", radius);
-      circle.setAttribute("class", "circle");
-      canvas.appendChild(circle);
-    }, 2000);
-    setTimeout(() => {
-      if (p5 && p3) {
-        const dx = p3.x - p5.x;
-        const dy = p3.y - p5.y;
-        const extX = p3.x + dx * 0.30;
-        const extY = p3.y + dy * 0.30;
-        const extLine = document.createElementNS(NS, "line");
-        extLine.setAttribute("x1", p3.x);
-        extLine.setAttribute("y1", p3.y);
-        extLine.setAttribute("x2", extX);
-        extLine.setAttribute("y2", extY);
-        extLine.setAttribute("class", "line thickened");
-        canvas.appendChild(extLine);
-        const text = document.getElementById("text");
-        text.setAttribute("x", extX + 20);
-        text.setAttribute("y", extY - 50);
-      }
-    }, 5000);
-
+    // Fetch quotes uit quotes.txt en start weergave
     async function fetchQuotes() {
       const response = await fetch('quotes.txt');
       const text = await response.text();
+
+      // Quotes parsen uit text bestand
       const lines = text.trim().split('\n');
       let quotes = lines.map(line => {
         const match = line.match(/\[(\d{2}-\d{2}-\d{4}) (\d{2}:\d{2})\] (.*?): (.*)/);
-        return match ? { date: match[1], time: match[2], person: match[3], quote: match[4] } : null;
+        if (!match) return null;
+        return {
+          date: match[1],
+          time: match[2],
+          person: match[3],
+          quote: match[4]
+        };
       }).filter(q => q);
 
-      quotes.reverse();
-      let index = 0;
-      const quoteIndicator = document.getElementById('quoteIndicator');
-      const container = document.getElementById('quotes');
+      quotes.reverse();  // Laatste quote eerst tonen
 
+      const container = document.getElementById('quotes');
+      const quoteIndicator = document.getElementById('quoteIndicator');
+      let index = 0;
+
+      // Toon volgende quote met animatie
       function showNextQuote() {
         if (quotes.length === 0) return;
 
         const oldQuote = container.querySelector('.quote');
 
         if (oldQuote) {
+          // Oude quote animatie naar rechts, dan verwijderen
           oldQuote.classList.add('last');
-          addQuote();
+          addNewQuote();
           setTimeout(() => {
             oldQuote.remove();
-          }, 1000); // duur animatie slideOutRight = 1s
+          }, 1000); // duur animatie slideOutRight
         } else {
-          addQuote();
+          // Eerste quote zonder verwijderen
+          addNewQuote();
         }
       }
 
-      function addQuote() {
-        let quoteObj = quotes[index];
-        let quoteText = quoteObj.quote;
+      // Voeg nieuwe quote toe en start slide-in animatie
+      function addNewQuote() {
+        const quoteObj = quotes[index];
+        const quoteText = quoteObj.quote;
 
+        // Maak nieuw quote-element
         const quoteElement = document.createElement('div');
         quoteElement.classList.add('quote', 'new');
-        quoteElement.innerHTML = `${quoteText}<br><br>- ${quoteObj.person} -<br><br>${quoteObj.date} ${quoteObj.time}`;
+        quoteElement.innerHTML = `
+          ${quoteText}<br><br>
+          - ${quoteObj.person} -<br><br>
+          ${quoteObj.date} ${quoteObj.time}
+        `;
 
         container.appendChild(quoteElement);
 
-        // Na animatie 'new' class verwijderen zodat styling normaal blijft
+        // Verwijder 'new' class na animatie zodat styling normaal blijft
         setTimeout(() => {
           quoteElement.classList.remove('new');
         }, 1000);
 
-        quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
+        // Update indicator
+        quoteIndicator.textContent = `${index + 1}/${quotes.length}`;
 
-        const length = quoteText.length;
-        const seconds = (Math.ceil(length / 25) * 2) + 1;
+        // Bepaal hoe lang quote zichtbaar blijft, op basis van lengte
+        const durationSec = (Math.ceil(quoteText.length / 25) * 2) + 1;
         index = (index + 1) % quotes.length;
-        setTimeout(showNextQuote, seconds * 1000);
+
+        setTimeout(showNextQuote, durationSec * 1000);
       }
 
       showNextQuote();
