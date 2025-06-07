@@ -44,9 +44,7 @@
     }
 
     @keyframes fadeInMist {
-      to {
-        opacity: 1;
-      }
+      to { opacity: 1; }
     }
 
     #loading-screen {
@@ -103,42 +101,57 @@
       overflow-y: auto;
       height: 80vh;
       top: 10%;
+      /* extra: set min-height so the container doesn't jump */
+      min-height: 200px;
     }
 
-    /* Voeg fadeIn animatie toe aan quotes */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .quote {
+    /* Maak quotes absolute voor sliding animaties */
+    .quote-container div.quote {
+      position: absolute;
+      width: 100%;
+      max-width: 500px;
+      left: 50%;
+      transform: translateX(-50%);
       background: rgba(255, 255, 255, 0.15);
       padding: 20px;
       border-radius: 15px;
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
       font-size: 1.5em;
       line-height: 1.6;
-      max-width: 500px;
       text-align: center;
       color: #eef4f8;
       text-shadow: 0 0 5px rgba(255, 255, 255, 0.6);
-      position: relative;
       z-index: 10;
-      animation: fadeIn 2s ease forwards;
+      opacity: 1;
     }
 
+    /* Animatie slide in van links */
     @keyframes slideInLeft {
       from { transform: translateX(-100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(-50%); opacity: 1; }
     }
 
+    /* Animatie slide out naar rechts */
     @keyframes slideOutRight {
-      from { transform: translateX(0); opacity: 1; }
+      from { transform: translateX(-50%); opacity: 1; }
       to { transform: translateX(100%); opacity: 0; }
     }
 
+    /* Class voor oude quote die naar rechts gaat */
     .quote-container div.last {
-      animation: slideOutRight 2s ease-in-out forwards;
+      animation: slideOutRight 1s ease forwards;
+    }
+
+    /* Class voor nieuwe quote die van links komt */
+    .quote-container div.new {
+      animation: slideInLeft 1s ease forwards;
+      opacity: 1;
+      position: absolute;
+      width: 100%;
+      max-width: 500px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
     }
 
     .quote-indicator {
@@ -152,152 +165,159 @@
       font-size: 1.2em;
       font-weight: bold;
       opacity: 0.5;
+      z-index: 30;
     }
   </style>
 </head>
 <body>
 
-<!-- 🔄 Loading scherm -->
-<div id="loading-screen">
-  <svg id="canvas" viewBox="0 0 500 500" aria-hidden="true">
-    <text id="text" class="text" x="0" y="0">uotes</text>
-  </svg>
-</div>
-
-<!-- 📜 Main content -->
-<div id="main-content">
-  <div class="background-shapes">
-    <div class="shape"></div><div class="shape"></div><div class="shape"></div><div class="shape"></div>
-    <div class="shape"></div><div class="shape"></div><div class="shape"></div><div class="shape"></div>
-    <div class="square"></div>
+  <!-- 🔄 Loading scherm -->
+  <div id="loading-screen">
+    <svg id="canvas" viewBox="0 0 500 500" aria-hidden="true">
+      <text id="text" class="text" x="0" y="0">uotes</text>
+    </svg>
   </div>
-  <div class="quote-container" id="quotes"></div>
-  <div id="quoteIndicator" class="quote-indicator">1/1</div>
-</div>
 
-<!-- 🔧 Script -->
-<script>
-  setTimeout(() => {
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('main-content').style.display = 'flex';
-  }, 9000);
+  <!-- 📜 Main content -->
+  <div id="main-content">
+    <div class="background-shapes">
+      <div class="shape"></div><div class="shape"></div><div class="shape"></div><div class="shape"></div>
+      <div class="shape"></div><div class="shape"></div><div class="shape"></div><div class="shape"></div>
+      <div class="square"></div>
+    </div>
+    <div class="quote-container" id="quotes"></div>
+    <div id="quoteIndicator" class="quote-indicator">1/1</div>
+  </div>
 
-  const NS = "http://www.w3.org/2000/svg";
-  const centerX = 275, centerY = 250, radius = 90;
-  const points = [];
-  for (let i = 0; i < 5; i++) {
-    const angle = -Math.PI / 2 + i * (2 * Math.PI / 5);
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
-    points.push({x, y});
-  }
-  const canvas = document.getElementById('canvas');
-  points.forEach((pt, i) => {
-    const circle = document.createElementNS(NS, "circle");
-    circle.setAttribute("cx", pt.x);
-    circle.setAttribute("cy", pt.y);
-    circle.setAttribute("r", 3);
-    circle.setAttribute("class", "point");
-    circle.setAttribute("style", `animation-delay: ${i * 0.5}s`);
-    canvas.appendChild(circle);
-  });
-  const order = [0, 2, 4, 1, 3, 0];
-  let p5 = null, p3 = null;
-  for (let i = 0; i < order.length - 1; i++) {
-    const a = points[order[i]];
-    const b = points[order[i + 1]];
-    const line = document.createElementNS(NS, "line");
-    line.setAttribute("x1", a.x);
-    line.setAttribute("y1", a.y);
-    line.setAttribute("x2", b.x);
-    line.setAttribute("y2", b.y);
-    line.setAttribute("class", "line");
-    line.setAttribute("style", `animation-delay: ${2.5 + i * 0.6}s`);
-    canvas.appendChild(line);
-    if (order[i] === 2 && order[i + 1] === 4) {
-      p3 = points[2];
-      p5 = points[4];
+  <!-- 🔧 Script -->
+  <script>
+    setTimeout(() => {
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('main-content').style.display = 'flex';
+    }, 9000);
+
+    const NS = "http://www.w3.org/2000/svg";
+    const centerX = 275, centerY = 250, radius = 90;
+    const points = [];
+    for (let i = 0; i < 5; i++) {
+      const angle = -Math.PI / 2 + i * (2 * Math.PI / 5);
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+      points.push({x, y});
     }
-  }
-  setTimeout(() => {
-    const circle = document.createElementNS(NS, "circle");
-    circle.setAttribute("cx", centerX);
-    circle.setAttribute("cy", centerY);
-    circle.setAttribute("r", radius);
-    circle.setAttribute("class", "circle");
-    canvas.appendChild(circle);
-  }, 2000);
-  setTimeout(() => {
-    if (p5 && p3) {
-      const dx = p3.x - p5.x;
-      const dy = p3.y - p5.y;
-      const extX = p3.x + dx * 0.30;
-      const extY = p3.y + dy * 0.30;
-      const extLine = document.createElementNS(NS, "line");
-      extLine.setAttribute("x1", p3.x);
-      extLine.setAttribute("y1", p3.y);
-      extLine.setAttribute("x2", extX);
-      extLine.setAttribute("y2", extY);
-      extLine.setAttribute("class", "line thickened");
-      canvas.appendChild(extLine);
-      const text = document.getElementById("text");
-      text.setAttribute("x", extX + 20);
-      text.setAttribute("y", extY - 50);
-    }
-  }, 5000);
-
-  async function fetchQuotes() {
-    const response = await fetch('quotes.txt');
-    const text = await response.text();
-    const lines = text.trim().split('\n');
-    let quotes = lines.map(line => {
-      const match = line.match(/\[(\d{2}-\d{2}-\d{4}) (\d{2}:\d{2})\] (.*?): (.*)/);
-      return match ? { date: match[1], time: match[2], person: match[3], quote: match[4] } : null;
-    }).filter(q => q);
-
-    quotes.reverse();
-    let index = 0;
-    const quoteIndicator = document.getElementById('quoteIndicator');
-    const container = document.getElementById('quotes');
-
-    function showNextQuote() {
-      if (quotes.length === 0) return;
-
-      const oldQuote = container.querySelector('.quote');
-
-      if (oldQuote) {
-        oldQuote.classList.add('last');
-        setTimeout(() => {
-          oldQuote.remove();
-          addQuote();
-        }, 2000);
-      } else {
-        addQuote();
+    const canvas = document.getElementById('canvas');
+    points.forEach((pt, i) => {
+      const circle = document.createElementNS(NS, "circle");
+      circle.setAttribute("cx", pt.x);
+      circle.setAttribute("cy", pt.y);
+      circle.setAttribute("r", 3);
+      circle.setAttribute("class", "point");
+      circle.setAttribute("style", `animation-delay: ${i * 0.5}s`);
+      canvas.appendChild(circle);
+    });
+    const order = [0, 2, 4, 1, 3, 0];
+    let p5 = null, p3 = null;
+    for (let i = 0; i < order.length - 1; i++) {
+      const a = points[order[i]];
+      const b = points[order[i + 1]];
+      const line = document.createElementNS(NS, "line");
+      line.setAttribute("x1", a.x);
+      line.setAttribute("y1", a.y);
+      line.setAttribute("x2", b.x);
+      line.setAttribute("y2", b.y);
+      line.setAttribute("class", "line");
+      line.setAttribute("style", `animation-delay: ${2.5 + i * 0.6}s`);
+      canvas.appendChild(line);
+      if (order[i] === 2 && order[i + 1] === 4) {
+        p3 = points[2];
+        p5 = points[4];
       }
     }
+    setTimeout(() => {
+      const circle = document.createElementNS(NS, "circle");
+      circle.setAttribute("cx", centerX);
+      circle.setAttribute("cy", centerY);
+      circle.setAttribute("r", radius);
+      circle.setAttribute("class", "circle");
+      canvas.appendChild(circle);
+    }, 2000);
+    setTimeout(() => {
+      if (p5 && p3) {
+        const dx = p3.x - p5.x;
+        const dy = p3.y - p5.y;
+        const extX = p3.x + dx * 0.30;
+        const extY = p3.y + dy * 0.30;
+        const extLine = document.createElementNS(NS, "line");
+        extLine.setAttribute("x1", p3.x);
+        extLine.setAttribute("y1", p3.y);
+        extLine.setAttribute("x2", extX);
+        extLine.setAttribute("y2", extY);
+        extLine.setAttribute("class", "line thickened");
+        canvas.appendChild(extLine);
+        const text = document.getElementById("text");
+        text.setAttribute("x", extX + 20);
+        text.setAttribute("y", extY - 50);
+      }
+    }, 5000);
 
-    function addQuote() {
-      let quoteObj = quotes[index];
-      let quoteText = quoteObj.quote;
+    async function fetchQuotes() {
+      const response = await fetch('quotes.txt');
+      const text = await response.text();
+      const lines = text.trim().split('\n');
+      let quotes = lines.map(line => {
+        const match = line.match(/\[(\d{2}-\d{2}-\d{4}) (\d{2}:\d{2})\] (.*?): (.*)/);
+        return match ? { date: match[1], time: match[2], person: match[3], quote: match[4] } : null;
+      }).filter(q => q);
 
-      const quoteElement = document.createElement('div');
-      quoteElement.classList.add('quote');
-      quoteElement.innerHTML = `${quoteText}<br><br>- ${quoteObj.person} -<br><br>${quoteObj.date} ${quoteObj.time}`;
+      quotes.reverse();
+      let index = 0;
+      const quoteIndicator = document.getElementById('quoteIndicator');
+      const container = document.getElementById('quotes');
 
-      container.appendChild(quoteElement);
-      quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
+      function showNextQuote() {
+        if (quotes.length === 0) return;
 
-      const length = quoteText.length;
-      const seconds = (Math.ceil(length / 25) * 2) + 1;
-      index = (index + 1) % quotes.length;
-      setTimeout(showNextQuote, seconds * 1000);
+        const oldQuote = container.querySelector('.quote');
+
+        if (oldQuote) {
+          oldQuote.classList.add('last');
+          addQuote();
+          setTimeout(() => {
+            oldQuote.remove();
+          }, 1000); // duur animatie slideOutRight = 1s
+        } else {
+          addQuote();
+        }
+      }
+
+      function addQuote() {
+        let quoteObj = quotes[index];
+        let quoteText = quoteObj.quote;
+
+        const quoteElement = document.createElement('div');
+        quoteElement.classList.add('quote', 'new');
+        quoteElement.innerHTML = `${quoteText}<br><br>- ${quoteObj.person} -<br><br>${quoteObj.date} ${quoteObj.time}`;
+
+        container.appendChild(quoteElement);
+
+        // Na animatie 'new' class verwijderen zodat styling normaal blijft
+        setTimeout(() => {
+          quoteElement.classList.remove('new');
+        }, 1000);
+
+        quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
+
+        const length = quoteText.length;
+        const seconds = (Math.ceil(length / 25) * 2) + 1;
+        index = (index + 1) % quotes.length;
+        setTimeout(showNextQuote, seconds * 1000);
+      }
+
+      showNextQuote();
     }
 
-    showNextQuote();
-  }
-
-  fetchQuotes();
-</script>
+    fetchQuotes();
+  </script>
 
 </body>
 </html>
