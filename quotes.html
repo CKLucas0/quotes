@@ -263,27 +263,37 @@
 
     function showNextQuote() {
       if (quotes.length === 0) return;
+    
+      const oldQuote = container.querySelector('.quote');
+    
+      if (oldQuote) {
+        oldQuote.classList.add('last');
+        setTimeout(() => {
+          oldQuote.remove();
+          addQuote();
+        }, 2000);
+      } else {
+        addQuote();
+      }
+    }
+    
+    function addQuote() {
       let quoteObj = quotes[index];
       let quoteText = quoteObj.quote;
-
+    
       const quoteElement = document.createElement('div');
       quoteElement.classList.add('quote');
       quoteElement.innerHTML = `${quoteText}<br><br>- ${quoteObj.person} -<br><br>${quoteObj.date} ${quoteObj.time}`;
-
-      const oldQuote = container.querySelector('.quote');
-      if (oldQuote) {
-        oldQuote.classList.add('last');
-        setTimeout(() => oldQuote.remove(), 2000);
-      }
-
+    
       container.appendChild(quoteElement);
       quoteIndicator.innerHTML = `${index + 1}/${quotes.length}`;
-
+    
       const length = quoteText.length;
       const seconds = (Math.ceil(length / 25) * 2) + 1;
       index = (index + 1) % quotes.length;
       setTimeout(showNextQuote, seconds * 1000);
     }
+
 
     showNextQuote();
   }
