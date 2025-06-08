@@ -91,7 +91,6 @@
       background: rgba(255, 255, 255, 0.2);
       padding: 20px;
       border-radius: 15px;
-      box-shadow: 0 0 30px 15px rgba(255, 255, 255, 0.7);
       font-size: 1.5em;
       line-height: 1.6;
       max-width: 500px;
@@ -99,9 +98,13 @@
       position: absolute;
       animation: slideInLeft 2s ease-in-out;
       opacity: 1;
+      
+      /* 👇 GLOW bovenaan toegevoegd */
+      box-shadow: 
+        0 -20px 35px rgba(255, 255, 255, 0.7), /* glow naar boven */
+        0 0 20px rgba(255, 255, 255, 0.5),     /* algemene glow */
+        0 6px 15px rgba(0, 0, 0, 0.4);         /* schaduw onder */
     }
-
-
 
     @keyframes slideInLeft {
       from { transform: translateX(-100%); opacity: 0; }
